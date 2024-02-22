@@ -19,8 +19,8 @@ global sleep_dur = 20
 ; CHANGE THE BELOW KEYS TO THE KEYS YOU WANT TO USE
 runebolt_key := "q" 
 runicinvocation_key := "w"
-icerune_key := "RButton"
-firerune_key := "r"
+icerune_key := "r"
+firerune_key := "RButton"
 potion_key := "1"
 
 
@@ -33,7 +33,7 @@ While (GetKeyState("XButton2", "P"))
    skey(runebolt_key)
    sleep (280 * 1/multiplier)
    skey(runebolt_key)
-   sleep (290 * 1/multiplier)
+   sleep (300 * 1/multiplier)
    skey(runicinvocation_key)
    sleep (500 * 1/multiplier)
 }
@@ -44,12 +44,16 @@ Return
 MButton::
 {
    skey(icerune_key)
-   sleep (271 * 1/multiplier)
+   ;Send {%icerune_key%}
+   sleep (350 * 1/multiplier)
    skey(firerune_key)
-   sleep (220 * 1/multiplier)
+   ;Send {%firerune_key%}
+   sleep (300 * 1/multiplier)
    skey(icerune_key)
-   sleep (271 * 1/multiplier)
+   ;Send {%icerune_key%}
+   sleep (350 * 1/multiplier)
    skey(runicinvocation_key)
+   ;Send {%runicinvocation_key%}
    sleep (300 * 1/multiplier)
 }
 Return
@@ -64,19 +68,18 @@ Return
 
 
 ; Use potion when teleporting (experimental belt mod: X Seconds of Traversel CDR)
-/*
-~e:: 
-{
-   Sleep, 50
-   Send {%potion_key%}
-   Sleep, 200
-} 
-Return
-*/
+;~e:: 
+;{
+;   Sleep, 50
+;   Send {%potion_key%}
+;   Sleep, 200
+;} 
+;Return
+
 
 
 ; Hotkeys for fine tuning the cast speed multiplier
-[:: 
+Left:: 
 {
    multiplier:= multiplier - .05 
 
@@ -88,7 +91,7 @@ Return
 
 
 ; Hotkeys for fine tuning the cast speed multiplier
-]:: 
+Right:: 
 {
    multiplier:= multiplier + .05 
 
@@ -100,7 +103,7 @@ Return
 
 
 ; decrement the position of warping
-,::
+Down::
 {
    warp_position := Mod(warp_position - 1, 4)
 
@@ -112,7 +115,7 @@ Return
 
 
 ; increment the position of warping
-.::
+Up::
 {
    warp_position := Mod(warp_position + 1, 4)
 
