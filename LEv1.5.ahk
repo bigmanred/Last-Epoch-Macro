@@ -33,7 +33,7 @@ While (GetKeyState("XButton2", "P"))
    skey(runebolt_key)
    sleep (280 * 1/multiplier)
    skey(runebolt_key)
-   sleep (280 * 1/multiplier)
+   sleep (290 * 1/multiplier)
    skey(runicinvocation_key)
    sleep (500 * 1/multiplier)
 }
