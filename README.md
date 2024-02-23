@@ -10,7 +10,6 @@ This script is designed to automate certain actions in the game "Last Epoch" usi
 - Using potions during teleporting (experimental belt mod: X Seconds of Traversel CDR) (`~e`)
 - Fine-tuning the cast speed multiplier with `Left` and `Right` arrow keys
 - Incrementing and decrementing the position of warping using `Up` and `Down` arrow keys
-- Selling items with the `F5` key
 
 ## Setup
 
