@@ -25,7 +25,7 @@ potion_key := "1"
 
 
 ; Cast plasma orb
-XButton2::
+*XButton2::
 While (GetKeyState("XButton2", "P"))
 {
    skey(runebolt_key)
@@ -41,7 +41,7 @@ Return
 
 
 ; Cast aegis shield (Reowyn's Frostguard)
-MButton::
+*MButton::
 {
    skey(icerune_key)
    ;Send {%icerune_key%}
@@ -60,7 +60,7 @@ Return
 
 
 ; Warp to positions 1-4
-F1::
+*F1::
 {
    warp(59, 103 + warp_position * 113)
 }
@@ -68,7 +68,7 @@ Return
 
 
 ; Use potion when teleporting (experimental belt mod: X Seconds of Traversel CDR)
-;~e:: 
+;~*e:: 
 ;{
 ;   Sleep, 50
 ;   Send {%potion_key%}
@@ -79,7 +79,7 @@ Return
 
 
 ; Hotkeys for fine tuning the cast speed multiplier
-Left:: 
+*Left:: 
 {
    multiplier:= multiplier - .05 
 
@@ -91,7 +91,7 @@ Return
 
 
 ; Hotkeys for fine tuning the cast speed multiplier
-Right:: 
+*Right:: 
 {
    multiplier:= multiplier + .05 
 
@@ -103,7 +103,7 @@ Return
 
 
 ; decrement the position of warping
-Down::
+*Down::
 {
    warp_position := Mod(warp_position - 1, 4)
 
@@ -115,7 +115,7 @@ Return
 
 
 ; increment the position of warping
-Up::
+*Up::
 {
    warp_position := Mod(warp_position + 1, 4)
 
