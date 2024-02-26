@@ -2,108 +2,145 @@
 ;#Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-#IfWinActive Last Epoch
+SetKeyDelay, -1
+SetMouseDelay, -1
 
-;SetTimer CheckScriptUpdate, 100, 0x7FFFFFFF ; 100 ms, highest priority
+; Increased Cast Speed Stat (86% = 0.86 | 195% = 1.95)
+castSpeed := 0.86
 
-multiplier := 1 
-warp_position := 0
-; duration HOLDING DOWN keys
-global keyhold_dur = 30
-; duration IN BETWEEN different keys
-global sleep_dur = 20
+; Passives
+runeOfDilationLevel := 3
+arcaneMomentumLevel := 4
 
+; Runic Invocation Specialization
+runeSlingerLevel := 3
+transcriberOfPowerLevel := 2
+
+; Runebolt Specialization
+arcanistLevel := 1
 
 ; Key documentation: https://documentation.help/AutoHotkey-en/KeyList.htm
 ; Hotkey declaration NOTE: each declaration needs to be encapsulated with quotes ex := "x"
 ; CHANGE THE BELOW KEYS TO THE KEYS YOU WANT TO USE
 runebolt_key := "q" 
-runicinvocation_key := "w"
-icerune_key := "r"
-firerune_key := "RButton"
+runicinvocation_key := "r"
+icerune_key := "e" ; Frost Wall
+firerune_key := "g" ; Flame Ward
+teleport_hotkey := "w"
 potion_key := "1"
 
+; Educated Guesses based on testing
+runeBoltAnimationSpeed := 690
+runicInvocationAnimationSpeed := 810
+
+; State Variables
+warpBuff := 0
+arcaneMomentumStacks := 0
+transcriberOfPower := 0
+warp_position := 0
+castSpeedShrine := 0
+runicInvocationSpecificCastSpeed := runeSlingerLevel*0.05
+runeboltSpecificCastSpeed := runeSlingerLevel*0.04
+stunImmune := false
+castSpeed -= 0.01 ; Rounding Sanity
+
+; Hotkeys
+Hotkey, IfWinActive, Last Epoch
+Hotkey, *~%teleport_hotkey%, TeleportHandling
+Hotkey, IfWinActive
+
+NumpadMult::Reload
+
+#IfWinActive Last Epoch
 
 ; Cast plasma orb
-XButton2::
+*XButton2::
 While (GetKeyState("XButton2", "P"))
 {
+   if (!stunImmune)
+   {
+      ; MouseGetPos, curX, curY
+      ; MouseMove, 1717, 707
+      ; Sleep, 10
+      skey(teleport_hotkey)
+      CastSpeedSleep(750)
+   }
    skey(runebolt_key)
-   sleep (280 * 1/multiplier)
+   CastSpeedSleep(runeBoltAnimationSpeed, runeboltSpecificCastSpeed)
    skey(runebolt_key)
-   sleep (280 * 1/multiplier)
+   CastSpeedSleep(runeBoltAnimationSpeed, runeboltSpecificCastSpeed)
    skey(runebolt_key)
-   sleep (300 * 1/multiplier)
+   CastSpeedSleep(runeBoltAnimationSpeed, runeboltSpecificCastSpeed)
    skey(runicinvocation_key)
-   sleep (500 * 1/multiplier)
+   CastSpeedSleep(runicInvocationAnimationSpeed, runicInvocationSpecificCastSpeed)
 }
 Return
 
-
 ; Cast aegis shield (Reowyn's Frostguard)
-MButton::
+*MButton::
 {
    skey(icerune_key)
    ;Send {%icerune_key%}
-   sleep (350 * 1/multiplier)
+   sleep (350 * 1/castSpeed)
    skey(firerune_key)
    ;Send {%firerune_key%}
-   sleep (300 * 1/multiplier)
+   sleep (300 * 1/castSpeed)
    skey(icerune_key)
    ;Send {%icerune_key%}
-   sleep (350 * 1/multiplier)
+   sleep (350 * 1/castSpeed)
    skey(runicinvocation_key)
    ;Send {%runicinvocation_key%}
-   sleep (300 * 1/multiplier)
+   sleep (300 * 1/castSpeed)
 }
 Return
 
-
 ; Warp to positions 1-4
-F1::
+*F1::
 {
    warp(59, 103 + warp_position * 113)
 }
 Return
 
-
-; Use potion when teleporting (experimental belt mod: X Seconds of Traversel CDR)
-;~e:: 
-;{
-;   Sleep, 50
-;   Send {%potion_key%}
-;   Sleep, 200
-;} 
-;Return
-
-
-
-; Hotkeys for fine tuning the cast speed multiplier
-Left:: 
-{
-   multiplier:= multiplier - .05 
-
-   roundedmulti := Round(multiplier, 2)
-   ToolTip, Cast Speed: %roundedmulti%
-   SetTimer, RemoveToolTip, 1000
-}
+; Cast Speed Shrine
+Up::
+   castSpeedShrine := 0.3
+   SetTimer, DisableCastSpeedShrine, 55000
 Return
 
+; Cooldown Shrine?
 
-; Hotkeys for fine tuning the cast speed multiplier
-Right:: 
+; Trades
+*F5::
 {
-   multiplier:= multiplier + .05 
-
-   roundedmulti := Round(multiplier, 2)
-   ToolTip, Cast Speed: %roundedmulti%
-   SetTimer, RemoveToolTip, 1000
+   BlockInput, MouseMove
+   temp := Clipboard
+   Clipboard := 49494
+   MouseGetPos, curX, curY
+   Send, {LShift Down}
+   Sleep, 10
+   Click, right
+   Sleep, 100
+   Send, {LShift Up}
+   Sleep, 10
+   Click, 1566, 730
+   Sleep, 50
+   Send, ^a
+   Sleep, 50
+   Send, ^v
+   Sleep, 50
+   Click, 1533, 807
+   Sleep, 200
+   Click, 1533, 807
+   Sleep, 300
+   Click, 2617, 752
+   Sleep, 20
+   MouseMove, %curX%, %curY%
+   BlockInput, MouseMoveOff
 }
 Return
-
 
 ; decrement the position of warping
-Down::
+*Down::
 {
    warp_position := Mod(warp_position - 1, 4)
 
@@ -112,10 +149,8 @@ Down::
    SetTimer, RemoveToolTip, 1000
 }
 Return
-
-
 ; increment the position of warping
-Up::
+*Up::
 {
    warp_position := Mod(warp_position + 1, 4)
 
@@ -125,39 +160,98 @@ Up::
 }
 Return
 
-
-; Rebind walk
-;~Rbutton::f13
-
-
 ; Remove visible tooltip
 RemoveToolTip:
 SetTimer, RemoveToolTip, Off
 ToolTip
 Return
 
+#IfWinActive
 
-skey(key) 
+skey(key)
 {
+   global
    if (key == "RButton")
    {
       Send, {Click, Right}
-      Sleep, keyhold_dur
    }
    else
    {
       Send, {%key% down}
-      Sleep, keyhold_dur
+      Sleep, 10
       Send, {%key% up}
-      ;Sleep, sleep_dur
    }
 }
 
+; Use potion when teleporting (experimental belt mod: X Seconds of Traversel CDR)
+TeleportHandling()
+{
+   global
+   stunImmune := true
+   warpBuff := 0.1
+   SetTimer, DisableStunImmune, 5000
+   SetTimer, DisableWarpBuff, % runeOfDilationLevel * 950
+   SetTimer, DrinkPotion, 100
+   Return
+}
 
+DisableWarpBuff()
+{
+   global
+   SetTimer, DisableWarpBuff, Off
+   warpBuff := 0
+}
+
+DisableStunImmune()
+{
+   global
+   SetTimer, DisableStunImmune, Off
+   stunImmune := false
+   
+}
+DisableCastSpeedShrine()
+{
+   global
+   SetTimer, DisableCastSpeedShrine, Off
+   castSpeedShrine := 0
+}
+
+DrinkPotion()
+{
+   global
+   SetTimer, DrinkPotion, Off
+   skey(potion_key)
+}
+
+ResetArcaneMomentum()
+{
+   global
+   SetTimer, ResetArcaneMomentum, Off
+   arcaneMomentumStacks := 0
+}
+
+ResetTranscriberOfPower()
+{
+   global
+   SetTimer, ResetTranscriberOfPower, Off
+   transcriberOfPower := 0
+}
+
+CastSpeedSleep(baseSpeed, specificSkillCastSpeed = 0)
+{
+   global
+   SetTimer, ResetArcaneMomentum, 1900
+   
+   Sleep, Ceil((baseSpeed / (1 + castSpeed + warpBuff + (arcaneMomentumStacks*0.05) + transcriberOfPower + specificSkillCastSpeed + castSpeedShrine)) - 10)
+   if(arcaneMomentumStacks < arcaneMomentumLevel)
+   {
+      arcaneMomentumStacks += 1
+   }
+}
 ; Function to store original position of mouse
 warp(x, y)
 {
-   BlockInput On
+   BlockInput, MouseMove
    ; Get the current mouse position
    MouseGetPos, OriginalMouseX, OriginalMouseY
 
@@ -168,7 +262,7 @@ warp(x, y)
 
    ; Return the mouse to its original position
    MouseMove, %OriginalMouseX%, %OriginalMouseY%, 0
-   BlockInput Off
+   BlockInput, MouseMoveOff
 }
 
 
@@ -176,29 +270,3 @@ Mod(x, y)
 {
    return x - y * Floor(x / y)
 }
-
-
-/************************
-*  Ignore this section  *
-************************/
-; Reload script everytime there's a change
-; Used for debugging and creation, ignore this
-/*
-CheckScriptUpdate() {
-   global ScriptStartModTime
-   FileGetTime curModTime, %A_ScriptFullPath%
-   If (curModTime == ScriptStartModTime)
-       return
-   SetTimer CheckScriptUpdate, Off
-   Loop
-   {
-       reload
-       Sleep 300 ; ms
-       MsgBox 0x2, %A_ScriptName%, Reload failed. ; 0x2 = Abort/Retry/Ignore
-       IfMsgBox Abort
-           ExitApp
-       IfMsgBox Ignore
-           break
-   } ; loops reload on "Retry"
-}
-*/
